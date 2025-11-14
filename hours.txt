@@ -1,0 +1,9 @@
+2 hours- analyze and update old code
+40 minutes- meet with professor
+2 hour FINALLY GOT IT RUNNING!!!!
+4.40 hours total
+
+Ran a test model with a library, worked on and organized about 2 hours I think
+2 and a half hours getting torch to run as well as CUDA 
+
+8.4 hours total
