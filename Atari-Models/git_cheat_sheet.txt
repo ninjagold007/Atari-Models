@@ -1,0 +1,51 @@
+==========================
+        GIT CHEAT SHEET
+==========================
+
+BASICS
+------
+git init                      # Initialize a new repo
+git clone <url>               # Clone a repo
+git status                    # Check file status
+
+STAGING & COMMITTING
+--------------------
+git add <file>                # Stage a file
+git add .                     # Stage everything
+git commit -m "message"       # Commit changes
+
+BRANCHING
+---------
+git branch                    # List branches
+git branch <name>             # Create a branch
+git checkout <name>           # Switch to branch
+git checkout -b <name>        # Create + switch
+
+SYNCING WITH REMOTE
+-------------------
+git pull                      # Pull updates
+git pull origin <branch>      # Pull specific branch
+
+git push                      # Push changes
+git push -u origin <branch>   # Push first time (sets upstream)
+
+UNDO & FIX MISTAKES
+-------------------
+git reset <file>              # Unstage a file
+git reset --soft HEAD~1       # Undo last commit, keep changes
+git checkout -- <file>        # Discard local changes
+
+VIEWING HISTORY
+---------------
+git log                       # Full history
+git log --oneline             # Compact history
+
+REMOTES
+-------
+git remote -v                 # Show remotes
+git remote add origin <url>   # Add new remote
+
+DIFFERENCES
+-----------
+git diff                      # Show unstaged changes
+git diff --staged             # Show staged changes
