@@ -1,0 +1,5 @@
+*.pth
+SavedWeights/
+save/
+checkpoints/
+runs/
