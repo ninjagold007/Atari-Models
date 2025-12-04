@@ -1,3 +1,6 @@
+# --------------------------
+# Preprocessing helpers
+# --------------------------
 import cv2
 import torch
 from config.hyperparams import params
