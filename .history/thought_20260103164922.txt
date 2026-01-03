@@ -1,0 +1,6 @@
+have a line where if the ball goes above the line- it gains point
+could also time how long the ball stays over the line as the longer it is up there- the more points it may score!
+
+ok need 90 hours for D-!
+
+so i should include the seed and chart most used actions to see WHAT it learned!
