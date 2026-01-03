@@ -40,7 +40,7 @@ class load:
 
         n_actions = self.env.action_space.n
         self.model = DQN((NUM_STACK, FRAME_H, FRAME_W), n_actions).to(device)
-        self.model.load_state_dict(torch.load(hp.load_weights, map_location=device))
+        self.model.load_state_dict(torch.load(WEIGHTS, map_location=device))
         self.model.eval()
 
     def run(self, episodes=3, delay=0.01):

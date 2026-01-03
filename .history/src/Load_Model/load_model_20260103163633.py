@@ -1,6 +1,7 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))) # only affects imports in this file
 
+from pathlib import Path
 import time
 import torch
 import gymnasium as gym
@@ -17,9 +18,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 NUM_STACK = hp.NUM_STACK
 FRAME_H, FRAME_W = hp.FRAME_H, hp.FRAME_W
-WEIGHTS = hp.load_weights
 
 gym.register_envs(ale_py)
+WEIGHTS = Path(__file__).resolve().parents[1] / "SavedWeights" / "policy_net_best_DQN.pth"
 
 
 
@@ -40,7 +41,7 @@ class load:
 
         n_actions = self.env.action_space.n
         self.model = DQN((NUM_STACK, FRAME_H, FRAME_W), n_actions).to(device)
-        self.model.load_state_dict(torch.load(hp.load_weights, map_location=device))
+        self.model.load_state_dict(torch.load(WEIGHTS, map_location=device))
         self.model.eval()
 
     def run(self, episodes=3, delay=0.01):

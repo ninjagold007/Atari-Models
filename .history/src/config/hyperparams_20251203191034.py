@@ -1,5 +1,3 @@
-from pathlib import Path
-
 class params:
     def __init__(self):
         
@@ -10,7 +8,7 @@ class params:
         # self.ENV_ID = "ALE/SpaceInvaders-v5"
 
         #MODEL
-        self.MODEL_TYPE = "DQN"  
+        self.MODEL_TYPE = "DQN"  # options: DQN, A2C
         # self.MODEL_TYPE = "A2C"
         # self.MODEL_TYPE = "PPO"
         # self.MODEL_TYPE = "RainbowDQN"
@@ -38,6 +36,5 @@ class params:
 
         self.MAX_EPISODE_STEPS = 2000
         self.SAVE_DIR = "SavedWeights"
-        self.load_weights = Path(__file__).resolve().parents[1] / "SavedWeights" / "policy_net_best_DQN.pth"
         self.SAVE_EVERY_FINISHED = 100
         self.TOTAL_FINISHED_EPISODES_TO_RUN = 4000

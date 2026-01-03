@@ -1,36 +1,19 @@
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))) # only affects imports in this file
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import time
-import torch
 import gymnasium as gym
 import ale_py
-from collections import deque
+import torch
 from DQN.DQNModel import DQN
-from Preproccessing.Preproccessing import preprocess_frame
-from DQN.ReplayBuffer import ReplayBuffer
 from config.hyperparams import params
 hp = params()
 
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-NUM_STACK = hp.NUM_STACK
-FRAME_H, FRAME_W = hp.FRAME_H, hp.FRAME_W
-WEIGHTS = hp.load_weights
 
 gym.register_envs(ale_py)
-
-
-
-
-def init_stack(first_frame):
-    """Stack = 4 identical frames, matching training."""
-    f = first_frame.clone()
-    d = deque([f, f.clone(), f.clone(), f.clone()], maxlen=NUM_STACK)
-    s = torch.cat(list(d), dim=0).unsqueeze(0)
-    return s, d
-
 
 
 
@@ -40,7 +23,7 @@ class load:
 
         n_actions = self.env.action_space.n
         self.model = DQN((NUM_STACK, FRAME_H, FRAME_W), n_actions).to(device)
-        self.model.load_state_dict(torch.load(hp.load_weights, map_location=device))
+        self.model.load_state_dict(torch.load(model_path, map_location=device))
         self.model.eval()
 
     def run(self, episodes=3, delay=0.01):
