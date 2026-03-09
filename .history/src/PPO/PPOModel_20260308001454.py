@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 
 # --------------------------
-# A2C model- exact same as PPO model
+# PPO model
 # --------------------------
-class A2C(nn.Module):
+class PPO(nn.Module):
     def __init__(self, input_shape, n_actions):
         super().__init__()
         
@@ -28,8 +28,8 @@ class A2C(nn.Module):
             nn.ReLU(),
         )
         # Output layers for policy and value
-        self.policy = nn.Linear(512, n_actions)
-        self.value = nn.Linear(512, 1)
+        self.policy_head = nn.Linear(512, n_actions)
+        self.value_head = nn.Linear(512, 1)
 
     #fc means fully connected
     # moves data forward through the network
@@ -38,6 +38,6 @@ class A2C(nn.Module):
         x = x.reshape(x.size(0), -1)
         x =self.fc(x)
 
-        policy_logits = self.policy(x)
-        value = self.value(x)
+        policy_logits = self.policy_head(x)
+        value = self.value_head(x)
         return policy_logits, value

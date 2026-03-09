@@ -1,4 +1,6 @@
 import sys, os
+
+import PPO
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import math
@@ -10,8 +12,6 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from gymnasium.vector import SyncVectorEnv
-from DQN.DQNModel import DQN
-from DQN.ReplayBuffer import ReplayBuffer, Transition
 from Preproccessing.Preproccessing import preprocess_frame
 from config.hyperparams import params
 hp = params()
@@ -23,8 +23,42 @@ print("Using device:", device)
 if device.type == "cuda":
     print("GPU:", torch.cuda.get_device_name(0))
 
+class RolloutBuffer:#PPO uses a rollout buffer to store transitions for multiple steps before updating the policy. This class manages that buffer.
+    def __init__(self):
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        self.next_states = []
+        self.dones = []
+        self.log_probs = []  # For storing log probabilities of actions (used in PPO loss)
+        self.values = []     # For storing state values (used in PPO loss)
+        self.devices = []    # For storing device information of tensors (optional, can be useful for debugging)
 
-class A2CTrainer:
+
+    def clear(self):
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+        self.next_states.clear()
+        self.dones.clear()
+        self.log_probs.clear()
+        self.values.clear()
+        self.devices.clear()
+
+    def add(self, state, action, reward, next_state, done):
+        self.states.append(state)
+        self.actions.append(action)
+        self.rewards.append(reward)
+        self.next_states.append(next_state)
+        self.dones.append(done)
+        self.devices.append(state.device)  # Store the device of the state tensor
+        self.log_probs.append(None)  # Placeholder for log probabilities
+        self.values.append(None)     # Placeholder for state values
+    
+
+
+
+class PPOTrainer:
     def __init__(self, num_envs):
          # make vectorized envs
         def make_env(): 
@@ -39,10 +73,8 @@ class A2CTrainer:
         # shape of the game input
         input_shape = (hp.NUM_STACK, hp.FRAME_H, hp.FRAME_W)
         # Initialize networks
-        self.policy_net = DQN(input_shape, self.n_actions).to(device)
-        self.target_net = DQN(input_shape, self.n_actions).to(device)
-        self.target_net.load_state_dict(self.policy_net.state_dict())
-        self.target_net.eval()
+        self.policy_net = PPO(input_shape, self.n_actions).to(device)
+   
 
         # Initialize optimizer
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
@@ -67,9 +99,11 @@ class A2CTrainer:
     def select_actions(self):
         return 1
 
-    #optimize by sampling from replay buffer
+    #optimize
     def optimize_model(self):
         return 1
+
+    
        
 
     def run(self):
@@ -96,14 +130,8 @@ class A2CTrainer:
                 self.stacked_frames[i].append(pf)
                 next_state = torch.cat(list(self.stacked_frames[i]), dim=0).unsqueeze(0)
 
-                # Store transition in replay buffer
-                self.replay.push(
-                    self.current_states[i],
-                    int(actions[i]),
-                    None if done_flag else next_state,
-                    reward,
-                    done_flag
-                )
+                #rollout the next state if not done, otherwise set to None
+                buffer = self.buffers[i]
 
                 self.current_states[i] = None if done_flag else next_state
 
@@ -157,19 +185,3 @@ class A2CTrainer:
                         
 
         print("Training completed.")
-
-
-
-    
-
-# Actor (πθ)
-#    ↓ chooses
-# Action a_t
-#    ↓ causes
-# Reward r_t, State s_{t+1}
-#    ↓ used by
-# Critic (Vφ)
-#    ↓ computes
-# Advantage A_t
-#    ↓ updates
-# Actor (πθ)

@@ -73,7 +73,7 @@ class PPOTrainer:
 
         # shape of the game input
         input_shape = (hp.NUM_STACK, hp.FRAME_H, hp.FRAME_W)
-        # Initialize critic and actor!
+        # Initialize networks
         self.policy_net = PPO(input_shape, self.n_actions).to(device)
    
 
@@ -93,59 +93,21 @@ class PPOTrainer:
 
     # Epsilon-greedy action selection
     #Equation from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-    # def _epsilon(self):
+    def _epsilon(self):
         return hp.EPS_END + (hp.EPS_START - hp.EPS_END) * math.exp(-1. * self.global_steps / hp.EPS_DECAY)
 
     # Select actions for all environments
     def select_actions(self):
-        actions = []
-        log_probs = []
-        values = []
-        for i in range(self.num_envs):
-            state = self.current_states[i]
-            if state is None:
-                # If the environment is done, select a dummy action (e.g., 0) and log_prob/value of 0
-                actions.append(torch.tensor(0, device=device))
-                log_probs.append(torch.tensor(0.0, device=device))
-                values.append(torch.tensor(0.0, device=device))
-            else:
-                action, log_prob, value = self.policy_net.get_action_and_value(state)
-                actions.append(action)
-                log_probs.append(log_prob)
-                values.append(value)
-        return torch.stack(actions), torch.stack(log_probs), torch.stack(values)
+        return 1
 
     #optimize
     def optimize_model(self):
-        for buffer in self.buffers:
-            # Get batches from buffer and compute returns and advantages
-            states, actions, rewards, dones, log_probs, values = buffer.get_batches(device)
-            returns = self.compute_returns(rewards, dones, values)
-            advantages = returns - values
-
-            # Normalize advantages
-            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-            # PPO update
-            for _ in range(hp.PPO_EPOCHS):
-                new_log_probs, new_values = self.policy_net.evaluate_actions(states, actions)
-                ratio = torch.exp(new_log_probs - log_probs)
-                surr1 = ratio * advantages
-                surr2 = torch.clamp(ratio, 1.0 - hp.PPO_CLIP_EPSILON, 1.0 + hp.PPO_CLIP_EPSILON) * advantages
-                policy_loss = -torch.min(surr1, surr2).mean()
-                value_loss = F.mse_loss(new_values, returns)
-                loss = policy_loss + hp.VALUE_LOSS_COEF * value_loss
-
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-        
-        
+        return 1
 
     
        
 
-    def run(self): # log_probs from actor, values from critic, rewards and dones from envs, states from stacked frames
+    def run(self):
         print(f"Starting training with {self.num_envs} environments (float32 GPU).")
         finished_episode_total = 0
 
@@ -223,10 +185,9 @@ class PPOTrainer:
                             #also include current best
                             torch.save(self.policy_net.state_dict(),
                                     os.path.join(hp.SAVE_DIR, f"policy_net_best_at_{finished_episode_total}.pth"))
-            #optimizes after each rollout instead of OPTIMIZE EVERY
+            #optimizes after each rollout
             self.optimize_model()
             # Clear buffers after optimization
             for buffer in self.buffers:
                 buffer.clear()  
-        #done :)
         print("Training completed.")

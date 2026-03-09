@@ -47,15 +47,23 @@ class A2CTrainer:
         # Initialize optimizer
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
 
+        # Initialize replay buffer
+        self.replay = ReplayBuffer(
+            hp.REPLAY_CAPACITY,
+            num_stack=hp.NUM_STACK,
+            frame_h=hp.FRAME_H,
+            frame_w=hp.FRAME_W,
+            device=device 
+        )
         # Create save directory if it doesn't exist
         os.makedirs(hp.SAVE_DIR, exist_ok=True)
 
         # Initialize all environments
         self._reset_all_envs_initial()
-
         # Reset all envs at the start
     def _reset_all_envs_initial(self):
         frames, _ = self.envs.reset()
+        # Initialize stacked frames and current states
       
 
     # Epsilon-greedy action selection

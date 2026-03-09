@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 # --------------------------
-# A2C model- exact same as PPO model
+# A2C model- exact same as PPO model, just different loss function and training loop
 # --------------------------
 class A2C(nn.Module):
     def __init__(self, input_shape, n_actions):

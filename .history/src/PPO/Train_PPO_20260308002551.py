@@ -24,7 +24,9 @@ if device.type == "cuda":
     print("GPU:", torch.cuda.get_device_name(0))
 
 
-class A2CTrainer:
+
+
+class PPOTrainer:
     def __init__(self, num_envs):
          # make vectorized envs
         def make_env(): 
@@ -45,7 +47,8 @@ class A2CTrainer:
         self.target_net.eval()
 
         # Initialize optimizer
-        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
+        self.actor_optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
+                self.critic_optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
 
         # Create save directory if it doesn't exist
         os.makedirs(hp.SAVE_DIR, exist_ok=True)
@@ -157,19 +160,3 @@ class A2CTrainer:
                         
 
         print("Training completed.")
-
-
-
-    
-
-# Actor (πθ)
-#    ↓ chooses
-# Action a_t
-#    ↓ causes
-# Reward r_t, State s_{t+1}
-#    ↓ used by
-# Critic (Vφ)
-#    ↓ computes
-# Advantage A_t
-#    ↓ updates
-# Actor (πθ)

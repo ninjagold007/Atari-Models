@@ -93,7 +93,7 @@ class PPOTrainer:
 
     # Epsilon-greedy action selection
     #Equation from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-    # def _epsilon(self):
+    def _epsilon(self):
         return hp.EPS_END + (hp.EPS_START - hp.EPS_END) * math.exp(-1. * self.global_steps / hp.EPS_DECAY)
 
     # Select actions for all environments
@@ -117,28 +117,6 @@ class PPOTrainer:
 
     #optimize
     def optimize_model(self):
-        for buffer in self.buffers:
-            # Get batches from buffer and compute returns and advantages
-            states, actions, rewards, dones, log_probs, values = buffer.get_batches(device)
-            returns = self.compute_returns(rewards, dones, values)
-            advantages = returns - values
-
-            # Normalize advantages
-            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-            # PPO update
-            for _ in range(hp.PPO_EPOCHS):
-                new_log_probs, new_values = self.policy_net.evaluate_actions(states, actions)
-                ratio = torch.exp(new_log_probs - log_probs)
-                surr1 = ratio * advantages
-                surr2 = torch.clamp(ratio, 1.0 - hp.PPO_CLIP_EPSILON, 1.0 + hp.PPO_CLIP_EPSILON) * advantages
-                policy_loss = -torch.min(surr1, surr2).mean()
-                value_loss = F.mse_loss(new_values, returns)
-                loss = policy_loss + hp.VALUE_LOSS_COEF * value_loss
-
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
         
         
 

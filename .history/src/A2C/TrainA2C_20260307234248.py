@@ -47,16 +47,54 @@ class A2CTrainer:
         # Initialize optimizer
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=hp.LR)
 
+        # Initialize replay buffer
+        self.replay = ReplayBuffer(
+            hp.REPLAY_CAPACITY,
+            num_stack=hp.NUM_STACK,
+            frame_h=hp.FRAME_H,
+            frame_w=hp.FRAME_W,
+            device=device 
+        )
+
+        # deque is basically a double-sided queue
+        # stacked frames is like a sticky note for each frame
+        # must complete an end of the pile before moving to the next note/frame
+        # each frame note contains info about memory
+        # ✅ Initialize list for stacked frames
+        self.stacked_frames = []
+        for i in range(num_envs):
+            self.stacked_frames.append(deque(maxlen=hp.NUM_STACK))
+
+        # Current states for each environment
+        self.current_states = []
+        for i in range(num_envs):
+            self.current_states.append(None)
+
+        # Other variables
+        self.global_steps = 0
+        self.episode_counters = [0] * num_envs
+        self.episode_rewards = [0.0] * num_envs
+        self.best_reward = -float('inf')
+        self.left_count = 0
+        self.right_count = 0
+
         # Create save directory if it doesn't exist
         os.makedirs(hp.SAVE_DIR, exist_ok=True)
 
         # Initialize all environments
         self._reset_all_envs_initial()
-
         # Reset all envs at the start
     def _reset_all_envs_initial(self):
         frames, _ = self.envs.reset()
-      
+        # Initialize stacked frames and current states
+        for i in range(self.num_envs):
+            # CUDA!!!
+            pf = preprocess_frame(frames[i]).to(device).float()
+            # Create a deque filled with the initial frame
+            self.stacked_frames[i] = deque([pf] * hp.NUM_STACK, maxlen=hp.NUM_STACK)
+            # Concatenate stacked frames to form the current state
+            self.current_states[i] = torch.cat(list(self.stacked_frames[i]), dim=0).unsqueeze(0)
+
 
     # Epsilon-greedy action selection
     #Equation from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
@@ -69,8 +107,48 @@ class A2CTrainer:
 
     #optimize by sampling from replay buffer
     def optimize_model(self):
-        return 1
-       
+        #check if enough samples are available
+        if len(self.replay) < max(hp.BATCH_SIZE, hp.LEARN_START):
+            return
+
+        
+        transitions = self.replay.sample(hp.BATCH_SIZE)
+        batch = Transition(*zip(*transitions))
+
+        # Prepare batches for training
+        state_batch = torch.cat(batch.state, dim=0)
+        action_batch = torch.cat(batch.action, dim=0)
+        reward_batch = torch.cat(batch.reward, dim=0)
+        done_batch = torch.cat(batch.done, dim=0)
+
+        # ~ inverts bits, so non_final_mask is True for non-final states
+        non_final_mask = ~done_batch.squeeze(1) 
+        non_final_next_states = torch.cat([s for s, d in zip(batch.next_state, done_batch) if not d.item()], dim=0) \
+            if non_final_mask.any() else None
+
+        # Compute Q(s_t, a)
+        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
+
+        # Compute V(s_{t+1}) for all next states.
+        next_state_values = torch.zeros(hp.BATCH_SIZE, device=device)
+        if non_final_next_states is not None:
+            with torch.no_grad():
+                next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0]
+        
+        # Compute the expected Q values
+        expected_values = reward_batch.squeeze(1) + hp.GAMMA * next_state_values
+        loss = F.smooth_l1_loss(state_action_values.squeeze(1), expected_values)
+
+        # Optimize the model
+        self.optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 10.0)
+        self.optimizer.step()
+
+        # Soft update of the target network's weights
+        #tp = target parameter, pp = policy parameter
+        for tp, pp in zip(self.target_net.parameters(), self.policy_net.parameters()):
+            tp.data.copy_(tp.data * (1.0 - hp.TARGET_TAU) + pp.data * hp.TARGET_TAU)
 
     def run(self):
         print(f"Starting training with {self.num_envs} environments (float32 GPU).")

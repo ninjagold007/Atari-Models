@@ -118,7 +118,6 @@ class PPOTrainer:
     #optimize
     def optimize_model(self):
         for buffer in self.buffers:
-            # Get batches from buffer and compute returns and advantages
             states, actions, rewards, dones, log_probs, values = buffer.get_batches(device)
             returns = self.compute_returns(rewards, dones, values)
             advantages = returns - values

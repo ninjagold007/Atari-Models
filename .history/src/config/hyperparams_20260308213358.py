@@ -42,6 +42,8 @@ class params:
         self.TOTAL_FINISHED_EPISODES_TO_RUN = 4000
 
         #A2C and PPO hyperparameters
-        self.VALUE_LOSS_COEF = 0.5
+        self.A2C_ENTROPY_COEF = 0.01
+        self.A2C_VALUE_LOSS_COEF = 0.5
         self.PPO_EPOCHS = 4
         self.PPO_CLIP_EPSILON = 0.2
+        

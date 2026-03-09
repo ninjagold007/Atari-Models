@@ -40,8 +40,3 @@ class params:
         self.load_weights = Path(__file__).resolve().parents[1] / "SavedWeights" / "policy_net_best_DQN.pth"
         self.SAVE_EVERY_FINISHED = 100
         self.TOTAL_FINISHED_EPISODES_TO_RUN = 4000
-
-        #A2C and PPO hyperparameters
-        self.VALUE_LOSS_COEF = 0.5
-        self.PPO_EPOCHS = 4
-        self.PPO_CLIP_EPSILON = 0.2
