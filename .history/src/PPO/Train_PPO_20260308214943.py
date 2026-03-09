@@ -149,28 +149,6 @@ class PPOTrainer:
             running_return = rewards[t] + hp.GAMMA * running_return * (1 - dones[t])
             returns[t] = running_return
         return returns
-    def compute_advantages(self, rewards, dones, values, next_value=0):
-        advantages = torch.zeros_like(rewards)
-        running_advantage = 0
-        for t in reversed(range(len(rewards))):
-            td_error = rewards[t] + hp.GAMMA * next_value * (1 - dones[t]) - values[t]
-            running_advantage = td_error + hp.GAMMA * hp.VALUE_LOSS_COEF * running_advantage * (1 - dones[t])
-            advantages[t] = running_advantage
-            next_value = values[t]
-        return advantages
-    def compute_returns_and_advantages(self, rewards, dones, values, next_value=0):
-        returns = torch.zeros_like(rewards)
-        advantages = torch.zeros_like(rewards)
-        running_return = next_value
-        running_advantage = 0
-        for t in reversed(range(len(rewards))):
-            td_error = rewards[t] + hp.GAMMA * next_value * (1 - dones[t]) - values[t]
-            running_advantage = td_error + hp.GAMMA * hp.VALUE_LOSS_COEF * running_advantage * (1 - dones[t])
-            advantages[t] = running_advantage
-            running_return = rewards[t] + hp.GAMMA * running_return * (1 - dones[t])
-            returns[t] = running_return
-            next_value = values[t]
-        return returns, advantages
         
         
 

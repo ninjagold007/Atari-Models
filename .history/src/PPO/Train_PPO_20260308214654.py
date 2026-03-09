@@ -67,8 +67,6 @@ class PPOTrainer:
         self.envs = SyncVectorEnv([make_env for _ in range(num_envs)])
         self.num_envs = num_envs
         self.buffers = [RolloutBuffer() for _ in range(self.num_envs)]
-        self.current_states = [None] * self.num_envs
-        self.stacked_frames = [deque(maxlen=hp.NUM_STACK) for _ in range(self.num_envs)]
 
         # set Action space
         sample_env = self.envs.envs[0]
@@ -142,35 +140,6 @@ class PPOTrainer:
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-    def compute_returns(self, rewards, dones, values, next_value=0):
-        returns = torch.zeros_like(rewards)
-        running_return = next_value
-        for t in reversed(range(len(rewards))):
-            running_return = rewards[t] + hp.GAMMA * running_return * (1 - dones[t])
-            returns[t] = running_return
-        return returns
-    def compute_advantages(self, rewards, dones, values, next_value=0):
-        advantages = torch.zeros_like(rewards)
-        running_advantage = 0
-        for t in reversed(range(len(rewards))):
-            td_error = rewards[t] + hp.GAMMA * next_value * (1 - dones[t]) - values[t]
-            running_advantage = td_error + hp.GAMMA * hp.VALUE_LOSS_COEF * running_advantage * (1 - dones[t])
-            advantages[t] = running_advantage
-            next_value = values[t]
-        return advantages
-    def compute_returns_and_advantages(self, rewards, dones, values, next_value=0):
-        returns = torch.zeros_like(rewards)
-        advantages = torch.zeros_like(rewards)
-        running_return = next_value
-        running_advantage = 0
-        for t in reversed(range(len(rewards))):
-            td_error = rewards[t] + hp.GAMMA * next_value * (1 - dones[t]) - values[t]
-            running_advantage = td_error + hp.GAMMA * hp.VALUE_LOSS_COEF * running_advantage * (1 - dones[t])
-            advantages[t] = running_advantage
-            running_return = rewards[t] + hp.GAMMA * running_return * (1 - dones[t])
-            returns[t] = running_return
-            next_value = values[t]
-        return returns, advantages
         
         
 
