@@ -289,16 +289,29 @@ class DQNTrainer:
 
         print("Training completed.")
         moving_avg_reward = np.convolve(self.episode_rewards, np.ones((100,))/100, mode='valid')
+        plt.plot(moving_avg_reward)
+        plt.xlabel("Episode")
+        plt.ylabel("Moving Average Reward (100 episodes)")
+        plt.title("Moving Average Reward")
+        plt.show()
+
+        plt.plot(self.losses)
+        plt.xlabel("Training Steps")
+        plt.ylabel("Loss")
+        plt.title("Training Loss")
+        plt.show()  #make into its own function to plot?
         
-        make_chart(self, self.episode_rewards, "Episode Rewards", "Episode", "Reward")
-        make_chart(self, moving_avg_reward, "Moving Average Reward", "Episode", "Moving Average Reward (100 episodes)")
-        make_chart(self, self.losses, "Training Loss", "Training Steps", "Loss")
-        make_chart(self, self.episode_times, "Episode Times", "Finished Episodes", "Time (seconds)")
-        make_chart(self, self.eps_tracker, "Epsilon Decay", "Training Steps", "Epsilon Value")
-        make_chart(self, self.mean_q_values, "Mean Q-Values", "Training Steps", "Mean Q-Value")
-        make_chart(self, self.td_errors, "TD Errors", "Training Steps", "Mean TD Error")
+        plt.plot(self.episode_rewards)
+        plt.xlabel("Episode")   
+        plt.ylabel("Reward")
+        plt.title("Episode Rewards")
+        plt.show()
 
-
-
-
+# reward                done
+# moving_avg_reward     done
+# loss                  done
+# episode_length        done
+# epsilon               done
+# mean_q_value          done    
+# td_error              done
 

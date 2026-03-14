@@ -300,5 +300,11 @@ class DQNTrainer:
 
 
 
-
+# reward                done
+# moving_avg_reward     done
+# loss                  done
+# episode_length        done
+# epsilon               done
+# mean_q_value          done    
+# td_error              done
 

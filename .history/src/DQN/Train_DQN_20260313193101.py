@@ -290,15 +290,16 @@ class DQNTrainer:
         print("Training completed.")
         moving_avg_reward = np.convolve(self.episode_rewards, np.ones((100,))/100, mode='valid')
         
-        make_chart(self, self.episode_rewards, "Episode Rewards", "Episode", "Reward")
+        
         make_chart(self, moving_avg_reward, "Moving Average Reward", "Episode", "Moving Average Reward (100 episodes)")
         make_chart(self, self.losses, "Training Loss", "Training Steps", "Loss")
-        make_chart(self, self.episode_times, "Episode Times", "Finished Episodes", "Time (seconds)")
-        make_chart(self, self.eps_tracker, "Epsilon Decay", "Training Steps", "Epsilon Value")
-        make_chart(self, self.mean_q_values, "Mean Q-Values", "Training Steps", "Mean Q-Value")
-        make_chart(self, self.td_errors, "TD Errors", "Training Steps", "Mean TD Error")
+        make_chart(self, self.episode_rewards, "Episode Rewards", "Episode", "Reward")
 
-
-
-
+# reward                done
+# moving_avg_reward     done
+# loss                  done
+# episode_length        done
+# epsilon               done
+# mean_q_value          done    
+# td_error              done
 
