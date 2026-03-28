@@ -181,6 +181,7 @@ class DQNTrainer:
         self.losses = np.append(self.losses, loss.item())
         #Huber loss is more stable than MSE loss
         self.td_errors = np.append(self.td_errors, (prediction.squeeze(1) - target).abs().mean().item())
+        self.episode_lengths = np.append(self.episode_lengths, len(self.replay))
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -203,6 +204,7 @@ class DQNTrainer:
         while finished_episode_total < hp.TOTAL_FINISHED_EPISODES_TO_RUN:
             actions = self.select_actions()
             next_frames, rewards, terminateds, truncateds, _ = self.envs.step(actions)
+            
             rewards = np.clip(rewards, -1, 1)  
             # done is when either terminated or truncated is True
             #logical_or performs element-wise OR operation
@@ -301,7 +303,6 @@ class DQNTrainer:
         make_chart( np.array(self.td_errors), "TD Errors", "Training Steps", "Mean TD Error")
 
 
-# mean_adv = advantages.mean().item()
-# std_adv = advantages.std().item()
+
 
 

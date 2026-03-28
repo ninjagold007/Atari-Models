@@ -110,14 +110,14 @@ class PPOTrainer:
         for i in range(self.num_envs):
             state = self.current_states[i]
             if state is None:  # env done
-                actions.append(torch.tensor([0], device=device))
-                log_probs.append(torch.tensor([0.0], device=device))
-                values.append(torch.tensor([0.0], device=device))
+                actions.append(torch.tensor(0, device=device))
+                log_probs.append(torch.tensor(0.0, device=device))
+                values.append(torch.tensor(0.0, device=device))
             else:
                 a, lp, v = self.policy_net.get_action_and_value(state)
-                actions.append(a)
-                log_probs.append(lp)
-                values.append(v)
+                actions.append(a.squeeze().unsquueeze(0))
+                log_probs.append(lp.unsqueeze(0))
+                values.append(v.unsqueeze(0))
         return torch.stack(actions), torch.stack(log_probs), torch.stack(values)
 
     # optimize PPO

@@ -47,4 +47,3 @@ class params:
         self.PPO_CLIP_EPSILON = 0.2
         self.GAE_LAMBDA = 0.95      # how much we smooth advantages (0 = TD, 1 = Monte Carlo)
         self.ENTROPY_COEF = 0.01   # encourages exploration
-        self.ROLLOUT_STEPS = 128         # how many steps to collect before updating the model

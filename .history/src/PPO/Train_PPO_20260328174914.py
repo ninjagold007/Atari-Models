@@ -110,9 +110,9 @@ class PPOTrainer:
         for i in range(self.num_envs):
             state = self.current_states[i]
             if state is None:  # env done
-                actions.append(torch.tensor([0], device=device))
-                log_probs.append(torch.tensor([0.0], device=device))
-                values.append(torch.tensor([0.0], device=device))
+                actions.append(torch.tensor(0, device=device))
+                log_probs.append(torch.tensor(0.0, device=device))
+                values.append(torch.tensor(0.0, device=device))
             else:
                 a, lp, v = self.policy_net.get_action_and_value(state)
                 actions.append(a)
@@ -176,8 +176,7 @@ class PPOTrainer:
             rollout_steps = 0
             while rollout_steps < hp.ROLLOUT_STEPS:
                 actions, log_probs, values = self.select_actions()
-                actions_np = actions.squeeze(-1).cpu().numpy().astype(np.int32)
-                next_frames, rewards, terminateds, truncateds, _ = self.envs.step(actions_np)
+                next_frames, rewards, terminateds, truncateds, _ = self.envs.step(actions.cpu().numpy())
                 dones = np.logical_or(terminateds, truncateds)
                 done_indices = []
 

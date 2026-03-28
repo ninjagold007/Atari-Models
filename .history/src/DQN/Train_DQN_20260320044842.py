@@ -301,7 +301,6 @@ class DQNTrainer:
         make_chart( np.array(self.td_errors), "TD Errors", "Training Steps", "Mean TD Error")
 
 
-# mean_adv = advantages.mean().item()
-# std_adv = advantages.std().item()
+
 
 

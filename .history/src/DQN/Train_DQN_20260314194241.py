@@ -181,6 +181,7 @@ class DQNTrainer:
         self.losses = np.append(self.losses, loss.item())
         #Huber loss is more stable than MSE loss
         self.td_errors = np.append(self.td_errors, (prediction.squeeze(1) - target).abs().mean().item())
+        self.episode_lengths = np.append(self.episode_lengths, len(self.replay))
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -203,7 +204,6 @@ class DQNTrainer:
         while finished_episode_total < hp.TOTAL_FINISHED_EPISODES_TO_RUN:
             actions = self.select_actions()
             next_frames, rewards, terminateds, truncateds, _ = self.envs.step(actions)
-            rewards = np.clip(rewards, -1, 1)  
             # done is when either terminated or truncated is True
             #logical_or performs element-wise OR operation
             dones = np.logical_or(terminateds, truncateds)
@@ -290,18 +290,17 @@ class DQNTrainer:
                         
 
         print("Training completed.")
-        moving_avg_reward = np.convolve(np.array(self.all_scores), np.ones((100,))/100, mode='valid')
+        moving_avg_reward = np.convolve(np.array(self.episode_rewards), np.ones((100,))/100, mode='valid')
         
-        make_chart( np.array(self.all_scores), "Episode Rewards", "Episode", "Reward")
+        make_chart( np.array(self.episode_rewards), "Episode Rewards", "Episode", "Reward")
         make_chart( moving_avg_reward, "Moving Average Reward", "Episode", "Moving Average Reward (100 episodes)")
         make_chart( np.array(self.losses), "Training Loss", "Training Steps", "Loss")
-        make_chart( np.array(self.episode_lengths), "Episode Lengths", "Finished Episodes", "Length (time)")
+        make_chart( np.array(self.episode_lengths), "Episode Lengths", "Finished Episodes", "Length (steps)")
         make_chart( np.array(self.eps_tracker), "Epsilon Decay", "Training Steps", "Epsilon Value")
         make_chart( np.array(self.mean_q_values), "Mean Q-Values", "Training Steps", "Mean Q-Value")
         make_chart( np.array(self.td_errors), "TD Errors", "Training Steps", "Mean TD Error")
 
 
-# mean_adv = advantages.mean().item()
-# std_adv = advantages.std().item()
+
 
 

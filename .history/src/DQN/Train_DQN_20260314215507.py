@@ -181,6 +181,7 @@ class DQNTrainer:
         self.losses = np.append(self.losses, loss.item())
         #Huber loss is more stable than MSE loss
         self.td_errors = np.append(self.td_errors, (prediction.squeeze(1) - target).abs().mean().item())
+        self.episode_lengths = np.append(self.episode_lengths, len(self.replay))
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -301,7 +302,6 @@ class DQNTrainer:
         make_chart( np.array(self.td_errors), "TD Errors", "Training Steps", "Mean TD Error")
 
 
-# mean_adv = advantages.mean().item()
-# std_adv = advantages.std().item()
+
 
 

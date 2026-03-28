@@ -4,15 +4,15 @@ class params:
     def __init__(self):
         
         #GAME ENVIRONMENT
-        self.ENV_ID = "ALE/Breakout-v5"
-        # self.ENV_ID = "Pong-v4"
+        # self.ENV_ID = "ALE/Breakout-v5"
+        # self.ENV_ID = "Pong-v5"
         # self.ENV_ID = "CartPole-v1"
-        # self.ENV_ID = "ALE/SpaceInvaders-v5"
+        self.ENV_ID = "ALE/SpaceInvaders-v5"
 
         #MODEL
-        # self.MODEL_TYPE = "DQN"  
+        self.MODEL_TYPE = "DQN"  
         # self.MODEL_TYPE = "A2C"
-        self.MODEL_TYPE = "PPO"
+        # self.MODEL_TYPE = "PPO"
         # self.MODEL_TYPE = "RainbowDQN"
 
 
@@ -39,12 +39,9 @@ class params:
         self.SAVE_DIR = "SavedWeights"
         self.load_weights = Path(__file__).resolve().parents[1] / "SavedWeights" / "policy_net_best_DQN.pth"
         self.SAVE_EVERY_FINISHED = 100
-        self.TOTAL_FINISHED_EPISODES_TO_RUN = 500
+        self.TOTAL_FINISHED_EPISODES_TO_RUN = 4000
 
         #A2C and PPO hyperparameters
         self.VALUE_LOSS_COEF = 0.5
         self.PPO_EPOCHS = 4
         self.PPO_CLIP_EPSILON = 0.2
-        self.GAE_LAMBDA = 0.95      # how much we smooth advantages (0 = TD, 1 = Monte Carlo)
-        self.ENTROPY_COEF = 0.01   # encourages exploration
-        self.ROLLOUT_STEPS = 128         # how many steps to collect before updating the model
